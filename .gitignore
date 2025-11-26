@@ -11,6 +11,7 @@
 /out/
 
 # 保留 uploads 以便部署静态图片资源
+/public/uploads/
 
 # production
 /build
