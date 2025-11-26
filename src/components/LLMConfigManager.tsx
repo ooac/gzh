@@ -185,18 +185,16 @@ export default function LLMConfigManager({ onConfigSelect, selectedConfigId }: L
   }
 
   const createDefaultConfig = async (provider: string) => {
-    const defaultConfig = defaultConfigs[provider as keyof typeof defaultConfigs]
-    if (!defaultConfig) return
-
     setEditingConfig({
       id: '',
-      provider: defaultConfig.provider,
-      apiKey: defaultConfig.apiKey,
-      apiEndpoint: defaultConfig.apiEndpoint,
-      selectedModel: defaultConfig.selectedModel,
+      provider,
+      apiKey: '',
+      apiEndpoint: '',
+      selectedModel: '',
       isActive: true,
       isDefault: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     } as LLMConfig)
     setIsDialogOpen(true)
   }
@@ -238,19 +236,17 @@ export default function LLMConfigManager({ onConfigSelect, selectedConfigId }: L
               <h3 className="text-lg font-semibold text-foreground mb-2">快速开始</h3>
               <p className="text-muted-foreground mb-6">选择一个供应商，快速添加默认配置</p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
-                {Object.keys(defaultConfigs).map((provider) => (
+                {availableProviders.map(({ provider, name }) => (
                   <Button
                     key={provider}
                     variant="outline"
                     onClick={() => createDefaultConfig(provider)}
                     className="h-auto p-3 flex flex-col hover:border-primary/50 hover:bg-muted transition-colors"
                   >
-                    <div className="text-sm font-medium text-foreground">
-                      {llmAdapterFactory.getAdapter(provider).name}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {defaultConfigs[provider as keyof typeof defaultConfigs].selectedModel}
-                    </div>
+                  <div className="text-sm font-medium text-foreground">
+                      {name}
+                  </div>
+                    <div className="text-xs text-muted-foreground mt-1">点击添加</div>
                   </Button>
                 ))}
               </div>
