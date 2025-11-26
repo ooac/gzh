@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { ensureUserTable } from '@/lib/init-db'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-dev-secret-key'
 
 export async function POST(request: Request) {
   try {
+    // 保障 users 表存在（无迁移环境下）
+    await ensureUserTable(prisma)
     const { username, password, email } = await request.json()
 
     if (!username || !password) {

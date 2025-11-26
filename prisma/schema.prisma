@@ -4,7 +4,9 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  // 使用环境变量以兼容 Vercel（/tmp 可写）与本地开发
+  // 本地可设为 file:./dev.db；线上（Vercel）建议设置为 file:/tmp/dev.db
+  url      = env("DATABASE_URL")
 }
 
 model User {
