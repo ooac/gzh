@@ -6,7 +6,7 @@ import { llmAdapterFactory } from '@/lib/llm-adapters'
 export async function GET() {
   try {
     // 获取新的供应商配置
-    const providerConfigs = await prisma.lLMProviderConfig.findMany({
+    let providerConfigs = await prisma.lLMProviderConfig.findMany({
       include: {
         usageStats: true
       },
@@ -15,6 +15,77 @@ export async function GET() {
         { createdAt: 'desc' }
       ]
     })
+
+    // 如果数据库为空，则从环境变量注入一组可用配置（不暴露到客户端源码）
+    if (providerConfigs.length === 0) {
+      const envConfigs = [
+        {
+          provider: 'modelscope',
+          name: 'ModelScope',
+          apiKey: process.env.MODELSCOPE_API_KEY,
+          apiEndpoint: process.env.MODELSCOPE_ENDPOINT || 'https://api-inference.modelscope.cn/v1/',
+          selectedModel: process.env.MODELSCOPE_MODEL || 'qwen2.5-7b-instruct'
+        },
+        {
+          provider: 'siliconflow',
+          name: '硅基流动',
+          apiKey: process.env.SILICONFLOW_API_KEY,
+          apiEndpoint: process.env.SILICONFLOW_ENDPOINT || 'https://api.siliconflow.cn',
+          selectedModel: process.env.SILICONFLOW_MODEL || 'deepseek-chat'
+        },
+        {
+          provider: 'zhipu',
+          name: '智谱AI',
+          apiKey: process.env.ZHIPU_API_KEY,
+          apiEndpoint: process.env.ZHIPU_ENDPOINT || 'https://open.bigmodel.cn/api/paas/v4',
+          selectedModel: process.env.ZHIPU_MODEL || 'glm-4'
+        },
+        {
+          provider: 'minimax',
+          name: 'MiniMax',
+          apiKey: process.env.MINIMAX_API_KEY,
+          apiEndpoint: process.env.MINIMAX_ENDPOINT || 'https://api.minimax.chat/v1/',
+          selectedModel: process.env.MINIMAX_MODEL || 'abab6.5s-chat'
+        },
+        {
+          provider: 'openrouter',
+          name: 'OpenRouter',
+          apiKey: process.env.OPENROUTER_API_KEY,
+          apiEndpoint: process.env.OPENROUTER_ENDPOINT || 'https://openrouter.ai/api/v1/',
+          selectedModel: process.env.OPENROUTER_MODEL || 'anthropic/claude-3.5-sonnet'
+        }
+      ].filter(c => !!c.apiKey)
+
+      if (envConfigs.length > 0) {
+        for (const c of envConfigs) {
+          const created = await prisma.lLMProviderConfig.upsert({
+            where: { provider: c.provider },
+            update: {
+              apiKey: c.apiKey,
+              apiEndpoint: c.apiEndpoint,
+              selectedModel: c.selectedModel,
+              isActive: true,
+              updatedAt: new Date()
+            },
+            create: {
+              provider: c.provider,
+              name: c.name,
+              apiKey: c.apiKey,
+              apiEndpoint: c.apiEndpoint,
+              selectedModel: c.selectedModel,
+              isDefault: providerConfigs.length === 0, // 第一条作为默认
+              isActive: true,
+              usageStats: { create: { usageCount: 0 } }
+            },
+            include: { usageStats: true }
+          })
+        }
+        providerConfigs = await prisma.lLMProviderConfig.findMany({
+          include: { usageStats: true },
+          orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }]
+        })
+      }
+    }
 
     // 获取预定义模型
     const availableModels = await prisma.lLMModel.findMany({

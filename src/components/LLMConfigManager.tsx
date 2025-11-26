@@ -38,50 +38,8 @@ interface LLMConfigManagerProps {
   selectedConfigId?: string
 }
 
-const defaultConfigs = {
-  modelscope: {
-    name: 'ModelScope 默认配置',
-    provider: 'modelscope',
-    apiEndpoint: 'https://api-inference.modelscope.cn/v1/',
-    selectedModel: 'qwen2.5-7b-instruct',
-    apiKey: 'ms-cc61d2d0-e6ba-42ec-8578-8c5c4222f6c3'
-  },
-  siliconflow: {
-    name: '硅基流动 默认配置',
-    provider: 'siliconflow',
-    apiEndpoint: 'https://api.siliconflow.cn',
-    selectedModel: 'deepseek-chat',
-    apiKey: 'sk-avheuxkykgwfwwucphcualpdbjcnpdluvgrdmmacsqzfvexi'
-  },
-  zhipu: {
-    name: '智谱 默认配置',
-    provider: 'zhipu',
-    apiEndpoint: 'https://open.bigmodel.cn/api/paas/v4',
-    selectedModel: 'glm-4',
-    apiKey: 'fc6b4b170c1b463fbabac70973ab9902.Ls8T9PyGeXP9yJI8'
-  },
-  minimax: {
-    name: 'MiniMax 默认配置',
-    provider: 'minimax',
-    apiEndpoint: 'https://api.minimax.chat/v1/',
-    selectedModel: 'abab6.5s-chat',
-    apiKey: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiLmtbfonrrnlKjmiLdfMzE4MjE0MTgyNTIwMDI1MDg5IiwiVXNlck5hbWUiOiLmtbfonrrnlKjmiLdfMzE4MjE0MTgyNTIwMDI1MDg5IiwiQWNjb3VudCI6IiIsIlN1YmplY3RJRCI6IjE5Mjc5MTg3NDY0MDQzOTczMDEiLCJQaG9uZSI6IjE3NzIwMjgwMDAzIiwiR3JvdXBJRCI6IjE5Mjc5MTg3NDYzOTYwMDg2OTMiLCJQYWdlTmFtZSI6IiIsIk1haWwiOiIiLCJDcmVhdGVUaW1lIjoiMjAyNS0xMC0yOCAxMzo0MToxNyIsIlRva2VuVHlwZSI6MSwiaXNzIjoibWluaW1heCJ9.mUQsbrYu5FEzWNRkWrXZgWeoQAOqHKs5wPniHd05J_3-Lv1IUY3oMlravmLWgwlofjJN7Lbn8WkVC4OfKOGS1RtdGuSeX8g-MJpLnKTEULSRWMcKrB9HCygFA_GYkA3VWChK3YvAHbKj73zh68vjzc1_IzPHFkXN4XQCFcsSHyRfQMA9ePpUCbQOgY03EISUGGJKjzaqkfCOv9EaDRfdw4mVeSwmUROu6_dGKpf9EO-xmt3ju3CfvVm2JK2TY3dmiLvLFVG5hgLk-YDJVzHYfM6y_ZMiGtJlQkRbNj7YZYR2t4qPHtLO7gD_DjbOMycUtHr622GiTv7c_B_vE4EYhg'
-  },
-  openrouter: {
-    name: 'OpenRouter 默认配置',
-    provider: 'openrouter',
-    apiEndpoint: 'https://openrouter.ai/api/v1/',
-    selectedModel: 'anthropic/claude-3.5-sonnet',
-    apiKey: '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'
-  },
-  aihubmix: {
-    name: 'AiHubMix 默认配置',
-    provider: 'aihubmix',
-    apiEndpoint: 'https://aihubmix.com',
-    selectedModel: 'gpt-4',
-    apiKey: 'sk-UnkQ0vnPIfIdVlIA313fA5Ac39704dFdA37618F0A538E36e'
-  }
-}
+// 默认配置不包含任何密钥，仅作为占位与展示；真实密钥由后端或环境变量提供
+const defaultConfigs = {}
 
 export default function LLMConfigManager({ onConfigSelect, selectedConfigId }: LLMConfigManagerProps) {
   const [configs, setConfigs] = useState<LLMConfig[]>([])

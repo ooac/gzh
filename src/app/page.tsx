@@ -71,7 +71,7 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle>欢迎回来</CardTitle>
             <CardDescription>
-              默认账号：用户名 admin，密码 bin9025
+              请登录您的账户以继续使用
             </CardDescription>
           </CardHeader>
           <CardContent>
