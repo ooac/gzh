@@ -110,7 +110,6 @@ export default function LoginPage() {
                   </Button>
                 </form>
           </CardContent>
-          </CardContent>
           <CardFooter className="flex justify-center border-t border-border pt-6">
             <p className="text-xs text-muted-foreground text-center">
               登录即代表您同意我们的服务条款和隐私政策
