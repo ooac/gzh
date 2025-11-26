@@ -10,8 +10,7 @@
 /.next/
 /out/
 
-# uploads (ignore heavy assets)
-/public/uploads/
+# 保留 uploads 以便部署静态图片资源
 
 # production
 /build
