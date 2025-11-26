@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import path from 'path'
-import { unlink } from 'fs/promises'
+// 生产环境不做本地文件删除，避免打包 public/uploads 进入 Serverless
 
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -14,11 +13,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
     const img = await prisma.image.findUnique({ where: { id }, include: { article: true } })
     if (!img) return NextResponse.json({ success: false, error: '图片不存在' }, { status: 404 })
 
-    // 删除本地文件（仅限 public/uploads）
-    if (img.localPath && img.localPath.startsWith('/uploads/')) {
-      const full = path.join(process.cwd(), 'public', img.localPath.replace(/^\/uploads\//, 'uploads/'))
-      try { await unlink(full) } catch { }
-    }
+    // 本地文件删除逻辑已移除，保留数据库记录清理与文章引用清理
 
     // 清理文章中的引用
     let removedFromArticle: string | null = null
