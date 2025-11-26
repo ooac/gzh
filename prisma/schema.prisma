@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  email     String?  @unique
+  bio       String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Article {
+  id             String          @id @default(cuid())
+  title          String
+  content        String
+  summary        String?
+  status         ArticleStatus   @default(DRAFT)
+  theme          String?         @default("hammer")
+  keywords       String
+  analysisData   String?
+  imagePrompts   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  publishedAt    DateTime?
+  images         Image[]         @relation("ArticleImages")
+  publishRecords PublishRecord[]
+  coverImageId   String?        @unique
+  coverImage     Image?          @relation("ArticleCoverImage", fields: [coverImageId], references: [id])
+
+  @@map("articles")
+}
+
+model Image {
+  id        String      @id @default(cuid())
+  url       String
+  alt       String?
+  source    ImageSource @default(UNSPLASH)
+  localPath String?
+  articleId String?
+  segmentIndex Int?
+  createdAt DateTime    @default(now())
+  article   Article?    @relation("ArticleImages", fields: [articleId], references: [id])
+  coverFor  Article?    @relation("ArticleCoverImage")
+
+  @@map("images")
+}
+
+model PublishRecord {
+  id           String          @id @default(cuid())
+  articleId    String
+  platform     PublishPlatform
+  platformId   String?
+  status       PublishStatus   @default(PENDING)
+  publishedAt  DateTime?
+  errorMessage String?
+  createdAt    DateTime        @default(now())
+  article      Article         @relation(fields: [articleId], references: [id])
+
+  @@map("publish_records")
+}
+
+model TopicAnalysis {
+  id           String   @id @default(cuid())
+  keyword      String
+  analysisData String
+  aiProvider   String
+  createdAt    DateTime @default(now())
+
+  @@map("topic_analysis")
+}
+
+model AIConfig {
+  id        String   @id @default(cuid())
+  provider  String
+  apiKey    String?
+  model     String
+  config    String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ai_configs")
+}
+
+model SearchHistory {
+  id            String           @id @default(cuid())
+  keyword       String
+  totalArticles Int
+  apiCost       Float
+  apiInfo       String?
+  searchDate    DateTime         @default(now())
+  reports       AnalysisReport[]
+  articles      WechatArticle[]
+
+  @@map("search_history")
+}
+
+model WechatArticle {
+  id              String        @id @default(cuid())
+  externalId      String        @unique
+  title           String
+  content         String
+  author          String
+  readCount       Int           @default(0)
+  likeCount       Int           @default(0)
+  lookingCount    Int           @default(0)
+  publishTime     DateTime
+  url             String
+  engagementRate  String        @default("0")
+  originalData    String?
+  createdAt       DateTime      @default(now())
+  searchHistoryId String
+  searchHistory   SearchHistory @relation(fields: [searchHistoryId], references: [id])
+
+  @@map("wechat_articles")
+}
+
+model AnalysisReport {
+  id              String        @id @default(cuid())
+  analysisData    String
+  wordCloudData   String
+  insightsData    String
+  renderedMarkdown String?
+  materialsJson   String?
+  generatedAt     DateTime      @default(now())
+  exportedAt      DateTime?
+  searchHistoryId String
+  searchHistory   SearchHistory @relation(fields: [searchHistoryId], references: [id])
+
+  @@map("analysis_reports")
+}
+
+model APIConfig {
+  id        String   @id @default(cuid())
+  service   String   @default("wechat") // wechat, unsplash等
+  apiKey    String?
+  apiUrl    String?
+  balance   Float    @default(0)
+  currency  String   @default("CNY")
+  config    String?  // JSON 其他配置
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("wechat_api_configs")
+}
+
+model LLMProviderConfig {
+  id              String         @id @default(cuid())
+  provider        String         @unique(map: "llm_provider_configs_provider_key")
+  name            String
+  apiKey          String?
+  apiEndpoint     String?
+  temperature     Float          @default(0.7)
+  maxTokens       Int            @default(2000)
+  isActive        Boolean        @default(true)
+  isDefault       Boolean        @default(false)
+  selectedModel   String?
+  availableModels String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  usageStats      LLMUsageStats?
+  featureSelections LLMFeatureSelection[]
+
+  @@map("llm_provider_configs")
+}
+
+model LLMModel {
+  id           String   @id @default(cuid())
+  provider     String
+  modelName    String
+  displayName  String
+  description  String?
+  maxTokens    Int      @default(4000)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@unique([provider, modelName])
+  @@map("llm_models")
+}
+
+model LLMUsageStats {
+  id                String              @id @default(cuid())
+  configId          String?             @unique
+  providerConfigId  String?             @unique
+  usageCount        Int                 @default(0)
+  lastUsedAt        DateTime?
+  config            LLMProviderConfig?  @relation(fields: [providerConfigId], references: [id])
+
+  @@map("llm_usage_stats")
+}
+
+model LLMFeatureSelection {
+  id               String             @id @default(cuid())
+  feature          String             @unique
+  providerConfigId String
+  selectedModel    String?
+  updatedAt        DateTime           @updatedAt
+  providerConfig   LLMProviderConfig  @relation(fields: [providerConfigId], references: [id])
+
+  @@map("llm_feature_selections")
+}
+
+model PromptTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  content   String
+  type      String   @default("collection_assistant")
+  version   String   @default("v1")
+  keyword   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, version], name: "name_version")
+
+  @@map("prompt_templates")
+}
+
+model PromptSelection {
+  id         String   @id @default(cuid())
+  keyword    String   @unique
+  extractId  String?
+  aggregateId String?
+  briefId    String?
+  updatedAt  DateTime @updatedAt
+
+  @@map("prompt_selections")
+}
+
+enum ArticleStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+}
+
+enum ImageSource {
+  UNSPLASH
+  LOCAL
+  EXTERNAL
+  QINIU
+}
+
+enum PublishPlatform {
+  XIAOHONGSHU
+  WECHAT
+}
+
+enum PublishStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
