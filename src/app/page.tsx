@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Sparkles } from 'lucide-react'
 
 export default function LoginPage() {
@@ -14,7 +13,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>, type: 'login' | 'register') {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsLoading(true)
     setError('')
@@ -23,7 +22,7 @@ export default function LoginPage() {
     const data = Object.fromEntries(formData)
 
     try {
-      const res = await fetch(`/api/auth/${type}`, {
+      const res = await fetch(`/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,10 +36,8 @@ export default function LoginPage() {
         throw new Error(result.error || 'Something went wrong')
       }
 
-      if (type === 'login' || type === 'register') {
-        router.push('/dashboard')
-        router.refresh()
-      }
+      router.push('/dashboard')
+      router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -74,18 +71,11 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle>欢迎回来</CardTitle>
             <CardDescription>
-              请登录您的账户以继续使用
+              默认账号：用户名 admin，密码 bin9025
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">登录</TabsTrigger>
-                <TabsTrigger value="register">注册</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="login">
-                <form onSubmit={(e) => onSubmit(e, 'login')} className="space-y-4">
+                <form onSubmit={onSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="username">用户名</Label>
                     <Input
@@ -94,6 +84,7 @@ export default function LoginPage() {
                       placeholder="请输入用户名"
                       required
                       className="bg-background/50 focus:bg-background transition-colors"
+                      autoComplete="username"
                     />
                   </div>
                   <div className="space-y-2">
@@ -105,6 +96,7 @@ export default function LoginPage() {
                       placeholder="请输入密码"
                       required
                       className="bg-background/50 focus:bg-background transition-colors"
+                      autoComplete="current-password"
                     />
                   </div>
                   {error && (
@@ -112,48 +104,12 @@ export default function LoginPage() {
                       {error}
                     </div>
                   )}
-                  <Button className="w-full btn-premium shadow-lg" disabled={isLoading}>
+                  <Button type="submit" className="w-full btn-premium shadow-lg" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     登录
                   </Button>
                 </form>
-              </TabsContent>
-
-              <TabsContent value="register">
-                <form onSubmit={(e) => onSubmit(e, 'register')} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="reg-username">用户名</Label>
-                    <Input
-                      id="reg-username"
-                      name="username"
-                      placeholder="设置用户名"
-                      required
-                      className="bg-background/50 focus:bg-background transition-colors"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="reg-password">密码</Label>
-                    <Input
-                      id="reg-password"
-                      name="password"
-                      type="password"
-                      placeholder="设置密码"
-                      required
-                      className="bg-background/50 focus:bg-background transition-colors"
-                    />
-                  </div>
-                  {error && (
-                    <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md border border-destructive/20">
-                      {error}
-                    </div>
-                  )}
-                  <Button className="w-full btn-premium shadow-lg" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    注册并登录
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+          </CardContent>
           </CardContent>
           <CardFooter className="flex justify-center border-t border-border pt-6">
             <p className="text-xs text-muted-foreground text-center">
